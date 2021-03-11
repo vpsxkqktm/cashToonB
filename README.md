@@ -22,7 +22,7 @@ ORM: Prisma
 
 ## DB connect with server
 
-#### create Database
+### create Database
 
 pgAdmin4 v5를 설치할 때 사용할 패스워드를 묻습니다. 이때 입력한 패스워드가 DB 서버를 켤 때 필요한 패스워드가 됩니다. 패스워드를 입력한 뒤 browser에서 PostgreSQL 13를 누르면 또 한 번 패스워드를 물은 뒤, postgreSQL 서버가 켜집니다. (PORT: 5432)
 
@@ -35,7 +35,7 @@ pgAdmin4 v5를 설치할 때 사용할 패스워드를 묻습니다. 이때 입�
 
 특별한 설정없이 사용하기 위해서 DataBase 우클릭 ㅡ> Create ㅡ> Database... 에 진입하여 Database 이름을 정하고 Save 합니다. create된 Database를 클릭하면 Database가 켜집니다.
 
-#### create .env File
+### create .env File
 
 prisma는 .env 파일을 읽어서 postgresql DB와 연결됩니다. 먼저 프로젝트 루트에 .env 파일을 생성합니다. 그리고 다음과 같이 작성합니다.
 
@@ -60,11 +60,174 @@ npx prisma migrate dev --preview-feature
 
 여기까지 성공하면 node_modules 폴더에 @prisma\client가 생성되면서 이제 서버와 클라이언트를 컨트롤 할 수 있게 됩니다.
 
-====
+---
+
+> 해당 프로젝트는 typescript를 사용할 것을 권장하지만, 제 지식 부족으로 인해 ㅡㅡ.. 일단은 파일명만 ts이고 내용은 js 기반으로 작성되어 있습니다.
 
 # Welcome to Server!
 
 이제부터 graphql과 prisma를 통해 서버를 개발할 수 있게 되었습니다. 이제 prisma, apollo 공식 문서를 읽읍시다.
 
 https://www.prisma.io/docs/
+
 https://www.apollographql.com/docs/apollo-server/
+
+### Start Server
+
+pgAdmin으로 DB 서버를 켠 뒤 터미널 창에 다음과 같이 입력합니다.
+
+```
+npm run dev
+```
+
+이제 크롬을 열어서 http://localhost:4000/ 에 진입하면 playground라는 graphql의 Query 테스트 페이지가 열립니다. 이제 서버 개발을 본격적으로 진행할 수 있습니다.
+
+### GraphQL
+
+서버는 이제 typeDefs에 정의되어 있는 문제를 resolvers를 참고하여 정답을 찾아 요청에 응답합니다.
+
+서버는 쿼리 언어인 graphql을 통해 개발하고 DB와 backend가 연동되어야 하는 부분이 있을 경우에 schema.prisma에 정의하여 DB와 backend의 객체 관계를 prisma가 자동으로 매핑하도록 합니다.
+
+**이제 graphql과 prisma 어떻게 사용하는지 createAccount를 통해 알아봅시다.**
+
+```gql
+// createAccount.typeDefs.ts
+
+import { gql } from "apollo-server";
+
+export default gql`
+  type CreateAccountResult {
+    ok: Boolean!
+    error: String
+  }
+  type Mutation {
+    createAccount(
+      username: String!
+      password: String!
+      email: String!
+    ): CreateAccountResult!
+  }
+`;
+```
+
+민감한 서버를 위한 언어답게 컴파일러가 객체 추론을 하지 않습니다. 개발자가 type을 만들어서 직접 객체 타입을 지정해줘야 합니다.
+
+- type Mutation: **클라이언트에서 데이터를 서버로 보내줘야할 때 사용합니다.** 예시로 들고 있는 계정 생성(createAccount)의 경우 유저의 정보를 클라이언트에서 입력받아 서버로 보내줘야하기 때문에 Mutation을 사용합니다.
+
+- type Query: 서버에 있는 데이터를 **가져오기만** 합니다. 열람, 조회 등의 작업을 해야할 때 사용합니다. seeProfile.typeDefs.ts 파일을 참고하세요.
+
+따라서 type Mutation {createAccount(...)}는 계정 생성을 위해 유저에게 받아야하는 데이터 목록들의 타입을 지정하는 코드입니다.
+
+이후 쓰여있는 :CreateAccountResult는 type Mutation의 요청 결과를 어떻게 반환(응답)할 것인가를 정의한 것으로, 풀어서 말하면 "type Mutation {createAccount(...)}의 결과는 CreateAccountResult의 형태에 따라 알려주십시오"가 됩니다.
+
+그래서 CreateAccountResult는 요청 응답에 성공하였는지를 true, false로 체크하는 'ok' 그리고 요청 응답에 실패할 경우 발생하는 error를 정의하였습니다.
+
+### GraphQL with. Prisma
+
+**여기 있는 내용을 사용합니다. https://www.prisma.io/docs/reference/api-reference/prisma-client-reference**
+
+이제 정의한 내용을 바탕으로 서버 응답을 만들어보겠습니다.
+
+```javascript
+// createAccount.resolvers.ts
+
+import * as bcrypt from "bcrypt";
+
+import client from "../../client";
+
+export default {
+  Mutation: {
+    createAccount: async (_, { username, email, password }) => {
+      try {
+        const existingUser = await client.user.findFirst({
+          where: {
+            OR: [
+              {
+                username,
+              },
+              {
+                email,
+              },
+            ],
+          },
+        });
+        if (existingUser) {
+          throw new Error("This username or email is already");
+        }
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await client.user.create({
+          data: {
+            username: username,
+            email: email,
+            password: hashedPassword,
+          },
+        });
+        return {
+          ok: true,
+        };
+      } catch (error) {
+        return error;
+      }
+    },
+  },
+};
+```
+
+graphql의 매서드는 다음과 같습니다.
+
+function(root, args, context, info) 서버에서 **\_**은 무시하는 매서드(인자값)를 뜻합니다. graphql에서는 매서드 순서를 **반드시** 지키게 되어있습니다.
+
+일반적으로 함수 매서드는 필요 없으면 그냥 넘기고 써버리면 됩니다.
+
+```javascript
+// 이런 listen 함수가 있을 때
+listen(port: number, hostname: string, backlog: number, callback?: () => void): Server
+
+listen(4000, 123) // 4000: port, 123: backlog
+// hostname이 number가 아니라 string이기 때문에 컴파일러가 추론하여 알아서 매서드를 넘겨줌
+```
+
+하지만 graphql(서버)에서는 이렇게 됩니다.
+
+```javascript
+listen(4000, 123); // 4000: port, 123: hostname
+// 무조건 순서 지켜서 매서드 넣어버림
+```
+
+즉 자기가 쓰지 않을 매서드는 **\_**을 사용하여 무시 처리를 직접해줘야 합니다.
+
+createAccount에서 무시된 root는 이전 resolver에서 받은 값을 말하는데, createAccount는 이전 resolver가 없기 때문에 root를 무시해줘야 합니다.
+
+이후에 나오는 args는 { username, email, password }
+즉, typeDefs에서 정의했던 계정 생성을 위해 유저에게 받아야하는 데이터들이죠.
+
+다행히 매서드를 더 작성하지 않으면 **\_**가 자동으로 완성되기 때문에
+
+```javascript
+createAccount: async(_, { username, email, password }, _, _); // 이렇게 할 필요는 없습니다.
+```
+
+#### using Prisma
+
+이제 본격적으로 Prisma의 기능이 사용됩니다. **existingUser**는 생성하려는 계정 정보가 이미 사용되었는지를 체크합니다.
+
+```javascript
+const existingUser = await client.user.findFirst({
+  where: {
+    OR: [
+      {
+        username,
+      },
+      {
+        email,
+      },
+    ],
+  },
+});
+```
+
+---
+
+## Playground and prisma Studio
+
+TODO: 쿼리를 개발 환경에서 실행하고 DB를 GUI로 확인하는 방법 소개
