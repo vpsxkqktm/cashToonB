@@ -90,7 +90,7 @@ npm run dev
 
 **이제 graphql과 prisma 어떻게 사용하는지 createAccount를 통해 알아봅시다.**
 
-```gql
+```javascript
 // createAccount.typeDefs.ts
 
 import { gql } from "apollo-server";
@@ -166,7 +166,10 @@ export default {
           ok: true,
         };
       } catch (error) {
-        return error;
+        return {
+          ok: false,
+          error: "Failed create account.",
+        };
       }
     },
   },
@@ -191,7 +194,7 @@ listen(4000, 123) // 4000: port, 123: backlog
 
 ```javascript
 listen(4000, 123); // 4000: port, 123: hostname
-// 무조건 순서 지켜서 매서드 넣어버림
+// 무조건 순서 지켜서 매서드 넣어버림. 에러 발생
 ```
 
 즉 자기가 쓰지 않을 매서드는 **\_**을 사용하여 무시 처리를 직접해줘야 합니다.
@@ -207,7 +210,7 @@ createAccount에서 무시된 root는 이전 resolver에서 받은 값을 말하
 createAccount: async(_, { username, email, password }, _, _); // 이렇게 할 필요는 없습니다.
 ```
 
-#### using Prisma
+### using Prisma
 
 이제 본격적으로 Prisma의 기능이 사용됩니다. **existingUser**는 생성하려는 계정 정보가 이미 사용되었는지를 체크합니다.
 
@@ -226,8 +229,69 @@ const existingUser = await client.user.findFirst({
 });
 ```
 
+> npx prisma migrate dev --preview-feature
+
+아까 위 명령어로 client를 만들었습니다. 이제 이 클라이언트를 활용하면 DB에 접근이 가능합니다. client에서 생성했었던 user 모델에 접근해봅시다.
+
+```javascript
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+```
+
+아직 prisma가 스키마까지 완전 자동으로 만들어주진 않습니다. 그래서 schema.prisma에서 개발자가 직접 관계 매핑을 어떻게 할 것인지 정해줘야 합니다.
+
+user.typeDefs.ts에 적힌 내용을 바탕으로 만들었던 schema.prisma에서 user 모델을 확인해보면 username과 email가 **@unique**로 선언되었습니다. 이는 DB에서 중복을 허용하지 않는다는 말입니다. 따라서 email과 username은 필터링을 걸면 이미 존재하는지, 존재하지 않는지 알 수 있습니다.
+
+- findFirst: DB 레코드에서 첫 번째로 일치하는 항목을 찾습니다.
+- where: 필터링 조건을 선언합니다.
+- OR: 논리연산자 ||와 동일합니다.
+
+즉, user들 중에 args로 입력받은 아이디와, 이메일 중복이 있는지 확인하는 코드입니다.
+
+```javascript
+await client.user.create({
+  data: {
+    username: username,
+    email: email,
+    password: hashedPassword,
+  },
+});
+```
+
+중복 체크가 완료되면 user 모델에 유저를 create 합니다. 그 유저의 값(data)는 username = 입력받은 username, email = 입력받은 이메일 ...이 됩니다.
+
 ---
 
 ## Playground and prisma Studio
 
-TODO: 쿼리를 개발 환경에서 실행하고 DB를 GUI로 확인하는 방법 소개
+Playground에서 DOCS를 누르면 서버 코드에서 작성한 함수들을 한 눈에 볼 수 있으며 그 아래에 있는 SCHEMA에선 선언한 스키마들을 한 눈에 볼 수 있습니다.
+
+한 번 작성했던 쿼리는 상단의 HISTORY를 통해 열람할 수 있고 불러와 쓸 수도 있습니다.
+
+이제 서버에서 직접 쿼리 언어를 작성하여 계정 생성을 해보겠습니다. localhost:4000에서 열리는 playground에서 다음과 같이 작성합니다.
+
+```javascript
+mutation {
+  createAccount(username:"admin" email: "admin@gmail.com" password: "1234"){
+    ok
+    error
+  }
+}
+
+```
+
+재생 버튼을 눌러 실행을 하면 username이 admin이고 email이 admin@gmail.com인 유저가 생성됩니다. 눈으로 확인하기 위해서는 프로젝트 폴더에서 터미널 창을 하나 더 열고 다음과 같이 입력합니다.
+
+```
+npm run studio
+```
+
+그러면 DB GUI창이 뜨고 여기서 DB를 GUI 환경에서 확인하거나 생성, 수정, 삭제가 가능합니다.
+
+---

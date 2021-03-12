@@ -33,7 +33,10 @@ export default {
           ok: true,
         };
       } catch (error) {
-        return error;
+        return {
+          ok: false,
+          error: "Failed create account.",
+        };
       }
     },
   },
