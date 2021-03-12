@@ -122,6 +122,8 @@ export default gql`
 
 그래서 CreateAccountResult는 요청 응답에 성공하였는지를 true, false로 체크하는 'ok' 그리고 요청 응답에 실패할 경우 발생하는 error를 정의하였습니다.
 
+- 자료형 뒤에 붙는 **!**은 반드시 포함해야하는 데이터를 말합니다. CreateAccountResult를 예시로 들자면, 서버 응답 성공 여부를 반환하는 ok는 반드시 사용되어야 하지만 error는 발생하는 경우에만 사용되기 때문에 !가 붙지 않습니다.
+
 ### GraphQL with. Prisma
 
 **여기 있는 내용을 사용합니다. https://www.prisma.io/docs/reference/api-reference/prisma-client-reference**
@@ -253,6 +255,8 @@ user.typeDefs.ts에 적힌 내용을 바탕으로 만들었던 schema.prisma에�
 - OR: 논리연산자 ||와 동일합니다.
 
 즉, user들 중에 args로 입력받은 아이디와, 이메일 중복이 있는지 확인하는 코드입니다.
+
+- graphql 쿼리 언어와 달리 prisma는 **!** 키워드를 쓰지 않습니다. 대신 자료형 뒤에 아무것도 쓰지 않으면 반드시 포함해야하는 데이터로 간주합니다. 대신 prisma는 graphql과 반대로 필수적이지 않는 데이터 자료형에 **?**을 붙여줍니다.
 
 ```javascript
 await client.user.create({
