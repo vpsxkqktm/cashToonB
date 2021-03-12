@@ -54,7 +54,7 @@ npx prisma migrate reset --preview-feature
 npx prisma migrate dev --preview-feature
 ```
 
-**npx prisma migrate reset --preview-feature**를 입력하면 모든 데이터 삭제된다고 겁을 줍니다. DB에 있는 내용들을 지우는 것이니 상관없습니다.
+**npx prisma migrate reset --preview-feature**를 입력하면 모든 데이터 삭제된다고 겁을 줍니다. DB에 있는 내용들을 지우는 것이니 초기 셋업 단계에서는 상관 없습니다.
 
 **npx prisma migrate dev --preview-feature**를 입력하면 migration name을 묻습니다. git의 commit 기능에서 메모를 남기는 것과 같습니다. (-m "")
 
