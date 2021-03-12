@@ -274,7 +274,7 @@ Playground에서 DOCS를 누르면 서버 코드에서 작성한 함수들을 �
 
 한 번 작성했던 쿼리는 상단의 HISTORY를 통해 열람할 수 있고 불러와 쓸 수도 있습니다.
 
-이제 서버에서 직접 쿼리 언어를 작성하여 계정 생성을 해보겠습니다. localhost:4000에서 열리는 playground에서 다음과 같이 작성합니다.
+이제 서버에서 직접 쿼리 언어를 작성하여 계정 생성을 해보겠습니다. localhost:4000에서 열리는 playground에 다음과 같이 작성합니다.
 
 ```javascript
 mutation {
@@ -295,3 +295,13 @@ npm run studio
 그러면 DB GUI창이 뜨고 여기서 DB를 GUI 환경에서 확인하거나 생성, 수정, 삭제가 가능합니다.
 
 ---
+
+## LOGIN Test
+
+아직 소셜로그인이 미구현이기 때문에 개발 테스트를 위해 jwt를 이용한 자체 로그인이 구현되어 있습니다. mutation{login()}을 playground에서 실행하면 token이 발급됩니다. 이 token을 playground 하단에 있는 **HTTP HEADERS**에 다음과 같이 작성합니다.
+
+```
+{"authorization": "발급받은 토큰"}
+```
+
+이러면 로그인된 상태
