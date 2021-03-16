@@ -27,7 +27,7 @@ export default {
           id: user.id,
         },
         process.env.SECRET_KEY
-      ); // https://randomkeygen.com/ 여기서 비밀번호 하나 랜덤 생성한 다음에 .env 파일에 선언
+      ); // https://randomkeygen.com/ 여기서 비밀번호 하나 랜덤 생성한 다음에 .env 파일에 SECRET_KEY로 선언 및 정의하기
       return {
         ok: true,
         token,

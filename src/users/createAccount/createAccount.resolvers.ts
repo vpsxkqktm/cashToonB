@@ -5,6 +5,7 @@ import client from "../../client";
 export default {
   Mutation: {
     createAccount: async (_, { username, email, password }) => {
+      //username, email 중복 체크
       try {
         const existingUser = await client.user.findFirst({
           where: {

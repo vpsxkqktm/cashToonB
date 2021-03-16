@@ -1,3 +1,5 @@
+// merge Resolvers, TyperDefs file
+
 import { loadFilesSync } from "@graphql-tools/load-files";
 import { mergeResolvers, mergeTypeDefs } from "@graphql-tools/merge";
 

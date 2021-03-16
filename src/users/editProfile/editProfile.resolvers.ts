@@ -11,7 +11,6 @@ export default {
         if (newPassword) {
           hashedPassword = await bcrypt.hash(newPassword, 10);
         }
-
         const updatedUser = await client.user.update({
           where: { id: loggedInUser.id },
           data: {
