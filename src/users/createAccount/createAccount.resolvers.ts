@@ -22,6 +22,7 @@ export default {
         if (existingUser) {
           throw new Error("This username or email is already");
         }
+        // 비밀번호 hash 암호화
         const hashedPassword = await bcrypt.hash(password, 10);
         await client.user.create({
           data: {

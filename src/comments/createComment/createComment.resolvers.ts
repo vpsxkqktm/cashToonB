@@ -19,6 +19,8 @@ export default {
             error: "Post not found.",
           };
         }
+        // 댓글은 post와 user 양측에게 관계성을 가지므로 반드시 둘다 connect 해주기
+        // post = 댓글이 달린 위치, user = 댓글 작성자
         await client.comment.create({
           data: {
             contents,

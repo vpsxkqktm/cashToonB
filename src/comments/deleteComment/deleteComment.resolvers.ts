@@ -17,6 +17,7 @@ export default {
           ok: false,
           error: "Comment not found.",
         };
+        // 댓글 주인과 로그인한 사람이 같은 사람인지 꼭 체크해주기
       } else if (comment.authorId !== loggedInUser.id) {
         return {
           ok: false,
