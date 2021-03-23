@@ -28,10 +28,15 @@ export const getUser = async (token) => {
 // 비로그인 DB 접근 막기
 export const protectResolver = (ourResolver) => (root, args, context, info) => {
   if (!context.loggedInUser) {
-    return {
-      ok: false,
-      error: "Please log in first.",
-    };
+    const query = info.operation.operation === "query";
+    if (query) {
+      return null;
+    } else {
+      return {
+        ok: false,
+        error: "Please log in first.",
+      };
+    }
   }
   return ourResolver(root, args, context, info);
 };

@@ -1,7 +1,7 @@
 import * as bcrypt from "bcrypt";
 
 import client from "../../client";
-import { protectResolver } from "../user.utils";
+import { protectResolver } from "../users.utils";
 
 export default {
   Mutation: {
@@ -11,7 +11,6 @@ export default {
         if (newPassword) {
           hashedPassword = await bcrypt.hash(newPassword, 10);
         }
-
         const updatedUser = await client.user.update({
           where: { id: loggedInUser.id },
           data: {

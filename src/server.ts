@@ -3,7 +3,7 @@ require("dotenv").config();
 import { ApolloServer } from "apollo-server";
 
 import { typeDefs, resolvers } from "./schema";
-import { getUser } from "./users/user.utils";
+import { getUser } from "./users/users.utils";
 
 // The ApolloServer constructor requires two parameters: your schema
 // definition and your set of resolvers.

@@ -122,7 +122,7 @@ export default gql`
 
 그래서 CreateAccountResult는 요청 응답에 성공하였는지를 true, false로 체크하는 'ok' 그리고 요청 응답에 실패할 경우 발생하는 error를 정의하였습니다.
 
-- 자료형 뒤에 붙는 **!**은 반드시 포함해야하는 데이터를 말합니다. CreateAccountResult를 예시로 들자면, 서버 응답 성공 여부를 반환하는 ok는 반드시 사용되어야 하지만 error는 발생하는 경우에만 사용되기 때문에 !가 붙지 않습니다.
+- 자료형 뒤에 붙는 **!**은 반드시 포함해야하는 데이터를 말합니다. CreateAccountResult를 예시로 들자면, 서버 응답 성공 여부를 반환하는 ok는 반드시 사용되어야 하지만 error는 발생하는 경우에만 사용되기 때문에 **!**가 붙지 않습니다.
 
 ### GraphQL with. Prisma
 
@@ -309,3 +309,7 @@ npm run studio
 ```
 
 이러면 로그인된 상태
+
+---
+
+## Connent AWS
