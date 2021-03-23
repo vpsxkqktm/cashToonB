@@ -309,3 +309,7 @@ npm run studio
 ```
 
 이러면 로그인된 상태
+
+---
+
+## Connent AWS

@@ -1,5 +1,5 @@
 import client from "../../client";
-import { protectResolver } from "../user.utils";
+import { protectResolver } from "../users.utils";
 
 export default {
   Mutation: {
