@@ -4,9 +4,9 @@
 
 ## Tech Stack
 
-기반 언어: TypeScript, JavaScript, GraphQL
-DB: postgreSQL
-ORM: Prisma
+기반 언어: TypeScript, JavaScript, GraphQL   
+DB: postgreSQL   
+ORM: Prisma   
 
 ## Requirements
 
