@@ -9,5 +9,12 @@ export default {
         },
       });
     },
+    likes: ({ id }) => {
+      return client.like.count({
+        where: {
+          postId: id,
+        },
+      });
+    },
   },
 };
