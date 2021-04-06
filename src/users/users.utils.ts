@@ -26,17 +26,19 @@ export const getUser = async (token) => {
 };
 
 // 비로그인 DB 접근 막기
-export const protectResolver = (ourResolver) => (root, args, context, info) => {
-  if (!context.loggedInUser) {
-    const query = info.operation.operation === "query";
-    if (query) {
-      return null;
-    } else {
-      return {
-        ok: false,
-        error: "Please log in first.",
-      };
+export function protectResolver(ourResolver) {
+  return function (root, args, context, info) {
+    if (!context.loggedInUser) {
+      const query = info.operation.operation === "query";
+      if (query) {
+        return null;
+      } else {
+        return {
+          ok: false,
+          error: "plase login first.",
+        };
+      }
     }
-  }
-  return ourResolver(root, args, context, info);
-};
+    return ourResolver(root, args, context, info);
+  };
+}

@@ -4,8 +4,10 @@ import { protectResolver } from "../../users/users.utils";
 // 게시판에 올라온 게시글 열람
 export default {
   Query: {
-    seePostboard: protectResolver(async (_, { lastId }, { loggedInUser }) => {
+    seePostboard: protectResolver(async (_, { offset }, { loggedInUser }) => {
       return await client.post.findMany({
+        take: 5,
+        skip: offset,
         where: {
           OR: [
             {
@@ -30,9 +32,6 @@ export default {
         orderBy: {
           createdAt: "desc",
         },
-        take: 5,
-        skip: lastId ? 1 : 0,
-        ...(lastId && { cursor: { id: lastId } }),
       });
     }),
   },
