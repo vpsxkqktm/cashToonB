@@ -6,7 +6,8 @@ export default {
   Query: {
     seePostboard: protectResolver(async (_, { offset }, { loggedInUser }) => {
       return await client.post.findMany({
-        take: 5,
+        // take: 가져올 데이터 개수 조절
+        take: 2,
         skip: offset,
         where: {
           OR: [
