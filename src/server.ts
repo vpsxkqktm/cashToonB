@@ -11,6 +11,7 @@ const server = new ApolloServer({
   typeDefs,
   resolvers,
   context: async (ctx) => {
+    // ctx.req.headers.token = authorization
     if (ctx.req) {
       return {
         loggedInUser: await getUser(ctx.req.headers.token),

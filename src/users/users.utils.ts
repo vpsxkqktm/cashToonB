@@ -27,7 +27,7 @@ export const getUser = async (token) => {
 
 // 비로그인 DB 접근 막기
 export function protectResolver(ourResolver) {
-  return function (root, args, context, info) {
+  return function (root: any, args: any, context: any, info: any) {
     if (!context.loggedInUser) {
       const query = info.operation.operation === "query";
       if (query) {
