@@ -23,3 +23,9 @@ export const uploadS3 = async (file, userId, folderName) => {
     .promise();
   return Location;
 };
+
+export const MultipleUploadS3 = async (files, userId, folderName) => {
+  const fileNames = await Promise.all(files.map((file) => file.filename));
+  console.log(fileNames);
+  return;
+};
