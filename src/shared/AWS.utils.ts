@@ -10,9 +10,10 @@ AWS.config.update({
 
 export const uploadS3 = async (file, userId, folderName) => {
   const { filename, createReadStream } = await file;
-  console.log(file);
   const readStream = createReadStream();
   const objectName = `${folderName}/${userId}-${Date.now()}-${filename}`;
+  //console.log(objectName);
+  //console.log(readStream);
   const { Location } = await new AWS.S3()
     .upload({
       Bucket: "cashtoon-uploader",
@@ -25,7 +26,36 @@ export const uploadS3 = async (file, userId, folderName) => {
 };
 
 export const MultipleUploadS3 = async (files, userId, folderName) => {
-  const fileNames = await Promise.all(files.map((file) => file.filename));
-  console.log(fileNames);
-  return;
+  let fileNames = [];
+  let createReadStream = [];
+  const readStream = [];
+  let locations = [];
+
+  const file = await Promise.all(files);
+
+  for (var key in file) {
+    fileNames.push(file[key]["filename"]);
+    createReadStream.push(file[key]["createReadStream"]);
+    readStream.push(createReadStream[key]());
+  }
+  const objectName = fileNames.map(
+    (item) => `${folderName}/${userId}-${Date.now()}-${item}`
+  );
+  // console.log(objectName[0]);
+  // console.log(readStream[0]);
+
+  for (var key in file) {
+    const upload = await new AWS.S3()
+      .upload({
+        Bucket: "cashtoon-uploader",
+        Key: objectName[key],
+        ACL: "public-read",
+        Body: readStream[key],
+      })
+      .promise();
+    locations.push(upload.Location);
+    // Locations.push(file[key]["Location"]);
+    // console.log(upload);
+  }
+  return locations;
 };
