@@ -5,6 +5,7 @@ export default gql`
     id: Int!
     author: User!
     title: String!
+    published: Boolean!
     files: [String]!
     views: Int!
     createdAt: String!

@@ -45,6 +45,7 @@ model Webtoon {
   author    User     @relation(fields: [authorId], references: [id])
   authorId  Int
   title     String
+  published Boolean  @default(true)
   files     String[]
   views     Int      @default(0)
   createdAt DateTime @default(now())
