@@ -46,6 +46,7 @@ model Webtoon {
   authorId  Int
   title     String
   published Boolean  @default(true)
+  thumbnail String?
   files     String[]
   views     Int      @default(0)
   createdAt DateTime @default(now())

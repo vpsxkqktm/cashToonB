@@ -6,6 +6,7 @@ export default gql`
     author: User!
     title: String!
     published: Boolean!
+    thumbnail: String
     files: [String]!
     views: Int!
     createdAt: String!
